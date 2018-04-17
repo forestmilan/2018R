@@ -1,13 +1,12 @@
 #######################################################
 #教学目标：
 #一、R作图的基本原则
-#二、基础绘图
-#三、ggplot2作图，映射、几何对象、分组、坐标轴、标签、样式设定等
-#四、作图基础！
-#五、其他作图如lattice
+#二、ggplot2作图，映射、几何对象、分组、坐标轴、标签、样式设定等
+#三、其他作图如lattice
+#四、基础绘图
+#五、作图基础！
 
 # 综合了肖凯、陈堰平、纽约大学图书馆、John Fox课件的内容
-
 
 # 1.1、为什么要作图
 #数据下载：http://www.xueqing.tv/upload/april-training/day4/data.zip
@@ -127,231 +126,8 @@ wireframe(V1~x*y,data=result6,scales = list(arrows = FALSE),
 ### 形状
 ### 文字
 
-############################################################
-# 二、利用基础绘图命令做统计图
-
-if(!require(MASS)) install.packages("MASS")
-data(UScereal)
-head(UScereal)
-
-############################################################
-# A. 选择合适的统计图
-
-# 单个连续变量的分布：One Continuous Variable
-
-# Q: What is the Distribution of Variable X?
-# Q: Is my Variable X normally distributed? Bimodal? Skewed?
-# Q: Are there any outliers in my variable?
-
-# Histogram
-hist(UScereal$calories, breaks = 15)
-hist(UScereal$calories, bin = 15)
-
-# Boxplot
-boxplot(UScereal$calories, horizontal = TRUE)
-
-
-# 单个分类变量：One Categorical (Discrete) Variable
-
-# Q: 各个类别是否均匀 evenly distributed?
-
-barplot(table(UScereal$shelf))
-
-plot(UScereal$shelf,type="p") # 没有意义
-
-# 两个连续变量：Two Continuous Variables
-
-# Q: Is there a relationship between Variable X and Variable Y?
-# Q: If there is a relationship, is it linear? Quadratic? 
-
-plot(x = UScereal$sugars, y = UScereal$calories)
-
-plot(calories ~ sugars, data = UScereal) # formula notation
-
-plot(UScereal[, c(2:8, 10)]) # 8个变量的scatterplot matrix
-
-
-# 一个连续变量和一个分类变量
-# One Continuous Variable and One Categorical Variable
-
-# Q: Is the distribution of Variable Y, different across categories of Variable X?
-
-boxplot(sugars ~ shelf, data = UScereal, horizontal = TRUE)
-
-
-# 两个连续变量和一个分类变量
-# Two Continuous Variables and One Categorical Variable
-
-# Q: Is the relationship between Variable X and Y different across categories of Variable Z?
-
-plot(calories ~ sugars, data = UScereal, col = shelf)
-
-legend('topright', inset = .05, legend = c(3,2,1),
-       fill = c('green', 'red', 'black'))
-
-#2017年11月8日接着讲
-
-
-##################################################
-# B.添加其他图形元素
-
-##########################
-# 1、添加标题
-# 方法1：在plot中用ylab, xlab and main参数
-if(!require(MASS)) install.packages("MASS")
-data(UScereal)
-
-plot(calories ~ sugars, data = UScereal, ylab = 'Calories',
-     xlab = 'Sugars (grams)', main = 'Nutrition of a Single Cup of Cereal')
-
-# 方法2 使用title function添加标题元素
-# 此时plot中设定 ann=FALSE 抑制原轴标题
-# Turn off axes and annotations (axis labels)
-
-plot(calories ~ sugars, data = UScereal, ann = FALSE)
-title(main = 'Nutrition of a Single Cup of Cereal', ylab = 'Calories',
-      xlab = 'Sugars (grams)') # add afterwards
-
-##########################
-# 2、修改图例 legend
-# 在plot后使用legend function
-plot(calories ~ sugars, data = UScereal, col = shelf)
-legend('topleft', inset = .05, legend = c(3,2,1),
-       fill = c('green', 'red', 'black'))
-
-#########################
-# 修改点形状和颜色 Point Shape and Color 
-# Tip: Changing color or shape of points can be used to represent the same dimension
-
-plot(calories ~ sugars, data = UScereal, pch = 15)
-
-# Set a color to a factor variable, and R will use default colors
-plot(calories ~ sugars, data = UScereal, pch = 19, col = shelf, bg = shelf)
-legend('topright', inset = .05, legend = c(3,2,1),
-       fill = c('green', 'red', 'black'))
-
-
-# Use a palette of defined colors
-palette(c('#e5f5f9', '#99d8c9', '#2ca25f'))
-
-plot(calories ~ sugars, data = UScereal, pch = 19, col = shelf, bg = shelf)
-legend('topright', inset = .05, legend = c(3,2,1),
-       fill = c('#e5f5f9', '#99d8c9', '#2ca25f'))
-
-# 颜色结合形状
-plot(calories ~ sugars, data = UScereal, pch = shelf,col=shelf)
-
-#如何还原默认颜色序列呢？
-?palette  ## 如何查看帮助讲解1
-palette("default")
-plot(calories ~ sugars, data = UScereal, col=shelf)
-
-#########################
-# 3、给点加标签 Label points
-# Label points with the text function
-plot(calories ~ sugars, data = UScereal, pch = 15)
-
-text(UScereal$sugars, UScereal$calories, row.names(UScereal),
-     col = "red", pos = 1, cex = .5)  ##可以测试学生帮助的使用1
-
-# The pos argument(1,2,3,4) 点的下左上右
-plot(calories ~ sugars, data = UScereal, pch = 15)
-text(UScereal$sugars, UScereal$calories, UScereal$mfr, col = "blue", pos = 2)
-
-# 标记极端值 Identify Outliers
-
-#（1）. 选出极端案例，以之作标签
-plot(calories ~ sugars, data = UScereal, pch = 19)
-
-outliers <- UScereal[which(UScereal$calories > 300),]
-
-text(outliers$sugars, outliers$calories - 15, labels = row.names(outliers))
-
-
-#（2）. 交互式选点-不太好选(windows可能好一点)
-plot(calories ~ sugars, data = UScereal, pch = 19)
-
-identify(UScereal$carbo, UScereal$calories, n = 2, labels = row.names(UScereal))     
-
-
-#（3）. 修改axis limits to remove outliers from view
-plot(calories ~ sugars, data = UScereal, pch = 19, ylim = c(0, 325))
-
-########################
-# 4.修改图形元素大小(text size, point size, label size etc..)
-
-# Use cex argument family
-plot(calories ~ sugars, data = UScereal, pch = 19, ann = FALSE, cex = 1.5)
-outliers <- UScereal[which(UScereal$calories > 300),]
-text(outliers$sugars, outliers$calories - 15,
-     labels = row.names(outliers), cex = .75)
-title(main = 'Nutrition of a Single Cup of Cereal', ylab = 'Calories',
-      xlab = 'Sugars (grams)', cex.main = 2, cex.lab = 1.5)
-
-# 上面我们使用得最多的是plot函数
-# 它还有哪些用法和设定？R帮助文件介绍2.
-
-###################################################
-#C. Combine Graphs into the Same Window
-##通过par读图形参数进行全局设定
-par(mfrow = c(2, 2))
-
-boxplot(calories ~ shelf, data = UScereal)
-hist(UScereal$calories, breaks = 15)
-boxplot(sugars ~ shelf, data = UScereal)
-hist(UScereal$sugars, breaks = 15)
-
-# 保存图片
-dev.print(png,file="file1.png",width=480,height=640)
-
-# 还原图形布局为单张图片
-par(mfrow = c(1, 1)) 
-
-# 查看可选项
-names(par())
-
-# 查看参数
-par("col")  # graphical parameters color
-
-###################################################
-#D、示例通过基础命令叠加元素形成一个复杂的图
-# 生成两个向量
-cars <- c(1, 3, 6, 4, 9)
-trucks <- c(2, 5, 4, 5, 12)
-# 取得取值范围
-g_range <- range(0, cars, trucks)
-
-#作图，抑制坐标轴和标题
-plot(cars, type="o", col="blue", ylim=g_range, 
-     axes=FALSE, ann=FALSE)
-
-# 定义x标签（1，2，3，4下左上右）
-axis(1, at=1:5, lab=c("Mon","Tue","Wed","Thu","Fri"))
-
-# 定义Y标签
-axis(2, las=1, at=4*0:g_range[2])
-
-# Create box around plot
-box()
-
-# Graph trucks with red dashed line and square points
-lines(trucks, type="o", pch=22, lty=2, col="red")
-
-grid(nx=NA,ny=NULL,lwd=2)
-
-#  主标题 red, bold/italic font
-title(main="Autos", col.main="red", font.main=4)
-
-# Label the x and y axes with dark green text
-title(xlab="Days", col.lab=rgb(0,0.5,0))
-title(ylab="Total", col.lab=rgb(0,0.5,0))
-
-# 图例设定 
-legend(1, g_range[2], c("cars","trucks"), cex=0.8, 
-       col=c("blue","red"), pch=21:22, lty=1:2)
-
 # ----------------------------------------------
-# - 三 利用ggplot2作图 -
+# - 二 利用ggplot2作图 -
 # ----------------------------------------------
 # ggplot2 package (by Hadley Wickham)
 # 请主要参看 R4DS 第3张visulisation
@@ -519,6 +295,61 @@ ggplot(data.melt,aes(x=Year,y=value,
   geom_area(color='black',size=0.3,
             position=position_fill())+
   scale_fill_brewer()
+
+#################################
+# 绘制两个均值的示例
+# 类似的例子
+#https://stackoverflow.com/questions/22305023/how-to-get-a-barplot-with-several-variables-side-by-side-grouped-by-a-factor
+#
+# ggplot争取数据来源于一个数据
+library(reshape2)
+library(ggplot2)
+# 分别绘制两个变量的取值
+d <- data.frame(A=c(1:10), B=c(11:20))
+#id
+d$ind <- seq_along(d$A)
+# 一种做法，（要求一个系列是每个类别都比另一个小，不然会遮住）
+# 不推荐
+ggplot(d, aes(ind, y = value, fill = variable,col=variable)) +
+  geom_bar(aes(y = B, col=NA,fill = "B")
+           ,stat='identity', position='dodge')+ 
+  geom_bar(aes(y = A, col = "A",fill=NA)
+           ,stat='identity') 
+
+############
+#正确的做法，已经汇总好的数据
+#变成长数据
+d.m <- melt(d, id.var='ind')
+# 作图
+ggplot(d.m, aes(x=ind, y=value, fill=variable)) + 
+  geom_bar(stat='identity', position='dodge')
+
+# 自定义标签
+ggplot(d.m,aes(x=ind,y=value,fill=factor(variable)))+
+  geom_bar(stat="identity",position="dodge")+
+  scale_fill_discrete(name="Gender",
+                      breaks=c("A", "B"),
+                      labels=c("Male", "Female"))+
+  xlab("Beverage")+ylab("Mean Percentage")
+
+# 尚未汇总的数据
+# 参考https://stackoverflow.com/questions/11857935/plotting-the-average-values-for-each-level-in-ggplot2
+
+df=data.frame(score1=c(4,2,3,5,7,6,5,6,4,2,3,5,4,8),
+              score2=c(4,5,3,5,7,6,5,9,4,2,3,5,4,8),
+              age=c(18,18,23,50,19,39,19,23,22,22,40,35,22,16))
+ggplot(df, aes(x=factor(age), y=score1)) + 
+  stat_summary(fun.y="mean", geom="bar")
+
+# 分类，然后在ggplot中汇总
+df.m<- melt(df,id="age")
+ggplot(df.m, aes(x=factor(age), y=value, fill=factor(variable))) +
+  stat_summary(fun.y=mean, geom="bar",position=position_dodge(0.1))
+
+# 也可以先汇总好，然后在ggplot中作图
+temp = aggregate(list(score = df$score1), list(age = factor(df$age)), mean)
+ggplot(data=temp, aes(x = age, y=score)) +
+  geom_bar(stat='identity')
 
 
 ## 直方图
